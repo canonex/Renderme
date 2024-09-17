@@ -1,0 +1,6 @@
+local _M = {}
+
+_M.general = {
+    watchdir = "/home/me/mydirtowatch",
+    blenderpath = "/blenderpath/currentlynotused",
+}
