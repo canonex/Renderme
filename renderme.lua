@@ -23,9 +23,9 @@
 -- Make easy to edit variables
 
 -- require "config"
-local config = require "config"
-
-log("Normal", "Watching  " .. config.general.watchdir)
+package.path = '*.lua;' .. package.path
+require "config"
+log("Normal", "Watching  " .. general.watchdir)
 
 
 settings {
@@ -73,45 +73,73 @@ render = {
 
 		-- render on create and modify
 		if event.etype == "Create" or event.etype == "Modify" then
+		
+				log("Normal", "filename ".. base)
+
 
 				-- Retrieve the hostname
 				local machinehostname = io.popen('hostname'):read('*l')
 
 				-- Name to check to stop process
-				local machinehostnamestop = machinehostname .. "-stop"
+				local machinehostnamestop = machinehostname .. ".stop"
+				log("Normal", "machinehostnamestop ".. machinehostnamestop)
+
+				-- Name to check to start process
+				local machinehostnamestart = machinehostname .. ".start"
+				log("Normal", "machinehostnamestart ".. machinehostnamestart)
 
 
-                                -- Check if the file base contains the "hostname-stop"
-                                if string.match(base, machinehostnamestop) then
+                -- Check if the file base contains the "hostname-stop" command
+                if string.match(base, machinehostnamestop) then
 
-                                                -- Rename the file to remove "machinehostnamestop"
-                                                local new_filename = string.gsub(filename, machinehostnamestop, "")
-                                                os.rename(baseDir .. filename, baseDir .. new_filename)
-                                                
-                                                -- Sigterm the rendering process
-                                                os.execute('ps -a -o "cmd" -o "|%p" | grep "' .. new_filename .. '" | grep -v "grep" | cut -d"|" -f2- | xargs -I % kill -s 15 %')
+                    -- Rename the file to remove "machinehostnamestop"
+                    local new_filename = string.gsub(filename, machinehostnamestop, "")
+                    log("Normal", "Renaming to ".. new_filename)
+                    os.rename(baseDir .. filename, baseDir .. new_filename)
+                    
+                    local basename = string.match(new_filename, '([^/]+)%.%w+$')
+                    log("Normal", "Basename is ".. basename)
+                    
+                    -- Sigterm the rendering process
+                    
+                    -- subdivided execution to avoid Unterminated quoted string error
+                    -- discover process by name and pid, pipe separated - ps -a -o "cmd" -o "|%p"
+                    local a = "ps -a -o 'cmd' -o '|%p'"
+                    -- find process containing basename
+                    local b = "grep \"" .. basename .. "\""
+                    -- avoid himself
+                    local c = "grep -v \"grep\""
+                    -- cut by pipe
+                    local d = "cut -d\"|\" -f2-"
+                    -- SIGTERM process
+                    local e = "xargs -I % kill -s 15 %"
+                    
+                    os.execute( a .. "|" .. b .. "|" .. c .. "|" .. d .. "|" .. e )
 
-						-- Write the processing status in lprocessing.txt, in the same source folder
-						os.execute('echo $(date "+%Y-%m-%d") - Rendering stopped by user on $(hostname) ' .. new_filename .. '" >> ' .. sourcePathdir .. 'lprocessing.txt')
+                    -- Write the processing status in lprocessing.txt, in the same source folder
+                    os.execute('echo $(date "+%Y-%m-%d") - Rendering stopped by user on $(hostname) ' .. new_filename .. '" >> ' .. sourcePathdir .. 'lprocessing.txt')
 
-                                                log("Normal", "Rendering stopped ".. baseDir .. new_filename)
-                                                os.execute(command)
+                    log("Normal", "Rendering stopped ".. baseDir .. new_filename)
 
-				-- Check if the file base contains the hostname of the machine
-				elseif string.match(base, machinehostname) then
 
-						-- Rename the file to remove "machinehostname"
-						local new_filename = string.gsub(filename, machinehostname, "")
-						os.rename(baseDir .. filename, baseDir .. new_filename)
+				-- Check if the file base contains the "hostname-start" command
+				elseif string.match(base, machinehostnamestart) then
 
-						-- Write the processing status in lprocessing.txt, in the same source folder
-						os.execute('echo $(date "+%Y-%m-%d") - Queued or processed by $(hostname) ' .. new_filename .. '" >> ' .. sourcePathdir .. 'lprocessing.txt')
+					-- Rename the file to remove "machinehostname"
+					local new_filename = string.gsub(filename, machinehostnamestart, "")
+					log("Normal", "Renaming to ".. new_filename)
+					os.rename(baseDir .. filename, baseDir .. new_filename)
 
-						-- Run the Blender command with the new file name
-						local command = 'blender -b "' .. baseDir .. new_filename .. '" -a'
-						log("Normal", "Rendering ".. baseDir .. new_filename)
-						os.execute(command)
+					-- Write the processing status in lprocessing.txt, in the same source folder
+					os.execute('echo $(date "+%Y-%m-%d") - Queued or processed by $(hostname) ' .. new_filename .. '" >> ' .. sourcePathdir .. 'lprocessing.txt')
+
+					-- Run the Blender command with the new file name
+					local command = 'blender -b "' .. baseDir .. new_filename .. '" -a'
+					log("Normal", "Rendering ".. baseDir .. new_filename)
+					os.execute(command)
 				end
+
+
 
 		end
 
@@ -127,4 +155,4 @@ render = {
 
 }
 
-sync{render, source=config.general.watchdir}
+sync{render, source=general.watchdir}
