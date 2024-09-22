@@ -19,7 +19,7 @@ settings {
 
 local formats = { blend = true }
 
-render = {
+renderstop = {
 	delay = 0,
 
 	maxProcesses = 1,
@@ -57,31 +57,53 @@ render = {
 		-- render on create and modify
 		if event.etype == "Create" or event.etype == "Modify" then
 
-				log("Normal", "filename ".. base)
+				log("Normal", "filename is ".. base)
+
 
 				-- Retrieve the hostname
 				local machinehostname = io.popen('hostname'):read('*l')
 
-				-- Name to check to start process
-				local machinehostnamestart = machinehostname .. ".start"
+				-- Name to check to stop process
+				local machinehostnamestop = machinehostname .. ".stop"
 
-				-- Check if the file base contains the "hostname-start" command
-				if string.match(base, machinehostnamestart) then
+				-- Check if the file base contains the "hostname-stop" command
+				if string.match(base, machinehostnamestop) then
 
-					-- Rename the file to remove "machinehostname"
-					local new_filename = string.gsub(filename, machinehostnamestart, "")
+					-- Rename the file to remove "machinehostnamestop"
+					local new_filename = string.gsub(filename, machinehostnamestop, "")
 					os.rename(baseDir .. filename, baseDir .. new_filename)
 
+					local basename = string.match(new_filename, '([^/]+)%.%w+$')
+
+					-- Sigterm the rendering process
+
+					-- subdivided execution to avoid Unterminated quoted string error
+					-- discover process by name and pid
+					local ca = "ps -ae -o 'pid' -o 'cmd'"
+					-- find process containing basename
+					local cb = "grep '" .. basename .. "'"
+					-- avoid himself grep -v 'grep' or...
+					local cc = "grep 'blender'"
+					-- select the first part
+					local cd = "awk '{print $1}'"
+					-- SIGTERM process
+					local ce = "xargs -I % kill -s 15 %"
+
+					local kommand = ca .. " | " .. cb .. " | " .. cc .. " | " .. cd .. " | " .. ce
+
+
+					-- Like os.execute but with return values
+					local handlec = io.popen( kommand )
+					local resultc = handlec:read("*a")
+					handlec:close()
+
 					-- Write the processing status in lprocessing.txt, in the same source folder
-					os.execute('echo $(date "+%Y-%m-%d") - Queued or processed by $(hostname) ' .. new_filename .. '" >> ' .. sourcePathdir .. 'lprocessing.txt')
+					os.execute('echo $(date "+%Y-%m-%d") - Rendering stopped by user on $(hostname) ' .. new_filename .. '" >> ' .. sourcePathdir .. 'lprocessing.txt')
 
-					-- Run the Blender command with the new file name
-					local command = 'blender -b "' .. baseDir .. new_filename .. '" -a'
-					os.execute(command)
+					log("Normal", "Rendering stopped ".. baseDir .. new_filename)
 
-					log("Normal", "Rendering ".. baseDir .. new_filename)
+
 				end
-
 		end
 
 		if event.etype == "Delete" then
@@ -96,4 +118,4 @@ render = {
 
 }
 
-sync{render, source=general.watchdir}
+sync{renderstop, source=general.watchdir}
