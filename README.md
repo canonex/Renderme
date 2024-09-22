@@ -28,7 +28,7 @@ stop restores the original filename and terminates the associated Blender proces
 Configure your params
 Copy this file in a folder, ex. /etc/lsyncd/
 Launch the rendering service ex. `lsyncd /etc/lsyncd/renderme.lua` and `lsyncd /etc/lsyncd/renderstop.lua`
-use `lsyncd -nodaemon /etc/lsyncd/renderme.lua` to debug...
+use `lsyncd -nodaemon /etc/lsyncd/renderme.lua` to debug or set up a service to start them automatically at start-up.
 
 &divide;
 
