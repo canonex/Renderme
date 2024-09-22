@@ -24,13 +24,13 @@ stop restores the original filename and terminates the associated Blender proces
   * Blender: can be linked in path ex. `sudo ln -s /home/user/blender-4.2.0-linux-x64/blender /usr/local/bin` or you can setup and alias
   * Some sort of file sync on the selected folder: (lsyncd itself, Syncthing, Dropbox, Google Drive, Microsoft OneDrive, ...)
 
-##Usage
+## Usage
 Configure your params
 Copy this file in a folder, ex. /etc/lsyncd/
 Launch the rendering service ex. `lsyncd /etc/lsyncd/renderme.lua` and `lsyncd /etc/lsyncd/renderstop.lua`
 use `lsyncd -nodaemon /etc/lsyncd/renderme.lua` to debug...
 
-
+&divide;
 
 License: GPLv3 or any later version
 
