@@ -1,0 +1,38 @@
+# Copy in /usr/lib/systemd/system or https://www.freedesktop.org/software/systemd/man/latest/systemd.unit.html#Unit%20File%20Load%20Path
+# Enable with
+# systemctl enable renderme@renderme.service; systemctl start renderme@renderme.service
+# systemctl enable renderme@renderstop.service; systemctl start renderme@renderstop.service
+
+[Unit]
+Description=Renderme - Lsyncd daemon %I
+After=network-online.target local-fs.target
+Requires=network-online.target local-fs.target
+StartLimitIntervalSec=60
+StartLimitBurst=4
+
+[Service]
+#ExecStartPre=/bin/sleep 30
+#Simple means lsyncd process will stay in the foreground and will not fork.
+Type=simple
+#Restart the service no matter how it stopped.
+Restart=always
+#Lowest priority
+Nice=19
+#Change the working directory so the "require" function of lua will find the config file
+WorkingDirectory=/home/crickyx/Documenti/Renderme
+#Nodaemon prevents lsyncd from daemonizing, use with simple type
+ExecStart=/usr/local/bin/lsyncd -nodaemon /etc/lsyncd/%i.lua
+#Reload its configuration files without restarting the process entirely
+ExecReload=/bin/kill -HUP $MAINPID
+PIDFile=/run/lsyncd%i.pid
+RestartSec=2
+
+# Hardening
+ProtectSystem=full
+PrivateTmp=true
+SystemCallArchitectures=native
+MemoryDenyWriteExecute=true
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
