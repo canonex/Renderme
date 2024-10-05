@@ -30,6 +30,13 @@ Copy this file in a folder, ex. /etc/lsyncd/
 Launch the rendering service ex. `lsyncd /etc/lsyncd/renderme.lua` and `lsyncd /etc/lsyncd/renderstop.lua`
 use `lsyncd -nodaemon /etc/lsyncd/renderme.lua` to debug or set up a service to start them automatically at start-up.
 
+Using systemd you can use the two services:
+systemctl start renderme@renderstop.service
+systemctl enable renderme@renderstop.service
+
+systemctl enable renderme@renderme.service
+systemctl enable renderme@renderme.service
+
 &divide;
 
 License: GPLv3 or any later version
