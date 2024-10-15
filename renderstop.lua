@@ -97,8 +97,16 @@ renderstop = {
 					local resultc = handlec:read("*a")
 					handlec:close()
 
+
+					local todayStart = os.date('%Y-%m-%d_%H-%M-%S')
+					local logContent = todayStart .. ' - Queued or processed by ' .. machinehostname .. ' - file ' .. new_filename
+
 					-- Write the processing status in lprocessing.txt, in the same source folder
-					os.execute('echo $(date "+%Y-%m-%d") - Rendering stopped by user on $(hostname) ' .. new_filename .. '" >> ' .. sourcePathdir .. 'lprocessing.txt')
+					os.execute('echo "' .. logContent .. '" >> "' .. sourcePathdir .. 'lprocessing.txt"')
+
+
+					-- Write the processing status in lprocessing.txt, in the same source folder
+					-- os.execute('echo $(date "+%Y-%m-%d") - Rendering stopped by user on $(hostname) ' .. new_filename .. '" >> ' .. sourcePathdir .. 'lprocessing.txt')
 
 					log("Normal", "Rendering stopped ".. baseDir .. new_filename)
 

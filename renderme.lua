@@ -72,8 +72,13 @@ render = {
 					local new_filename = string.gsub(filename, machinehostnamestart, "")
 					os.rename(baseDir .. filename, baseDir .. new_filename)
 
+					local today = os.date('%Y-%m-%d_%H-%M-%S')
+
+					local logContent = today .. ' - Queued or processed by ' .. machinehostname .. ' - file ' .. new_filename
+
 					-- Write the processing status in lprocessing.txt, in the same source folder
-					os.execute('echo $(date "+%Y-%m-%d") - Queued or processed by $(hostname) ' .. new_filename .. '" >> ' .. sourcePathdir .. 'lprocessing.txt')
+					os.execute('echo "' .. logContent .. '" >> "' .. sourcePathdir .. 'lprocessing.txt"')
+
 
 					-- Run the Blender command with the new file name
 					local command = 'blender -b "' .. baseDir .. new_filename .. '" -a'

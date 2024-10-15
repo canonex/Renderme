@@ -19,7 +19,7 @@ Restart=always
 #Lowest priority
 Nice=19
 #Change the working directory so the "require" function of lua will find the config file
-WorkingDirectory=/home/crickyx/Documenti/Renderme
+WorkingDirectory=/home/rickyx/Documents/Renderme
 #Nodaemon prevents lsyncd from daemonizing, use with simple type
 ExecStart=/usr/local/bin/lsyncd -nodaemon /etc/lsyncd/%i.lua
 #Reload its configuration files without restarting the process entirely
